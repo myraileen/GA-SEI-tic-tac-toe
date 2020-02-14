@@ -1,35 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
+//tic-tac-toe script
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="./css/style.css">
-</head>
+const gridBlocks = document.querySelectorAll(".gridBlock")
+const resetButtonElement = document.querySelector('button')
+const playerElement = document.querySelector("#player")
+let blueBlocks = []
+let redBlocks = []
+let turn = ''
+let win = ''
+let hits = 0
+let plays = 0
 
-<body>
-    <header>
-        <h1>tic-tac-toe</h1>
-        <section class="turn">
-            <h2 id="player"></h2>
-        </section>
-    </header>
-    <div class="gameBoard">
-        <div class="gridBlock" id=gridBlock11></div>
-        <div class="gridBlock" id=gridBlock12></div>
-        <div class="gridBlock" id=gridBlock13></div>
-        <div class="gridBlock" id=gridBlock21></div>
-        <div class="gridBlock" id=gridBlock22></div>
-        <div class="gridBlock" id=gridBlock23></div>
-        <div class="gridBlock" id=gridBlock31></div>
-        <div class="gridBlock" id=gridBlock32></div>
-        <div class="gridBlock" id=gridBlock33></div>
-    </div>
-    <footer>
-        <button id="resetButton">reset game</button>
-    </footer>
-    <script src='./js/script.js'></script>
-</body>
+nextPlayer = "red"
+let counter = 0
+const winningArrays = [
+    ['11', '12', '13'], ['21', '22', '23'], ['31', '32', '33'],
+    ['11', '21', '31'], ['12', '22', '32'], ['13', '23', '33'],
+    ['11', '22', '33'], ['13', '22', '31']
+]
 
-</html>
+//console.log(gridBlocks)
+function winCheck(turn, blockClicked) {
+
+    if (turn === "red") {
+        redBlocks.push(blockClicked)
+        redBlocks.length >= 3 ? evalWin(redBlocks) : ''
+    } else {
+        blueBlocks.push(blockClicked)
+        blueBlocks.length >= 3 ? evalWin(blueBlocks) : ''
+    }
+}
+
+function evalWin(blocks) {
+    hits = 0
+    //       //loop through each winning seq
+    for (let i = 0; i < winningArrays.length; i++) {
+        //console.log(winningArrays[i])
+        let s = winningArrays[i]
+        hits = 0
+
+        //check if values in players array are in the winning sequence
+        for (let j = 0; j < blocks.length; j++) {
+            s.includes(blocks[j])
+                //? console.log(`${blocks[j]} Y`) 
+                ? hits++
+                : ''
+            hits === 3 ? stopGame() : ''
+            //console.log (hits)
+        }
+    }
+}
+
+//Reset game function: clear colors, enable listners again, (update win/loss counters)
+const resetGame = function (event) {
+    nextPlayer = "red"
+    playerElement.innerHTML = `its your turn, ${nextPlayer}!`
+    gridBlocks.forEach(gridBlock => {
+        //console.log(gridBlock)
+        gridBlock.removeAttribute("style")
+        redBlocks = []
+        blueBlocks = []
+        counter = 0
+        startGame()
+    })
+}
+
+resetButtonElement.addEventListener("click", resetGame)
+
+const playATurn = function (event) {
+    let gridClick = ''
+    gridClick = event.target.id
+    turn = counter % 2 === 0 ? "red" : "blue"
+    turn === "red" ? nextPlayer = "blue" : nextPlayer = "red"
+    document.querySelector(`#${gridClick}`).style.background = turn
+
+    plays = plays + 1
+    console.log(plays)
+    debugger
+    if (plays === 9) {
+        stopGame()
+    }
+    counter++
+
+    disableListen(document.querySelector(`#${gridClick}`))
+    winCheck(turn, gridClick.substring(9))
+
+}
+
+const disableListen = function (block) {
+    block.removeEventListener("click", playATurn)
+}
+
+//click on a block
+function startGame() {
+    win = ''
+    plays = 0
+    gridBlocks.forEach(gridBlock => {
+        gridBlock.addEventListener("click", playATurn)
+    })
+}
+
+function stopGame() {
+    gridBlocks.forEach(gridBlock => {
+        debugger
+        plays === 9 ? playerElement.innerHTML = `tie!` : playerElement.innerHTML = `you won, ${turn}!`
+        gridBlock.removeEventListener("click", playATurn)
+    })
+}
+startGame()
